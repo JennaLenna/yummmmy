@@ -154,6 +154,32 @@
             -moz-appearance: textfield;
         }
 
+        .molecule-notes {
+            margin-top: 10px;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            resize: vertical;
+            min-height: 50px;
+            transition: border-color 0.3s;
+        }
+
+        .notes-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .notes-textarea::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
         .atom-counts-section {
             background: #f8f9fa;
             border-radius: 10px;
@@ -311,6 +337,7 @@
                 this.balanceStatus = document.getElementById('balance-status');
                 
                 this.coefficients = {};
+                this.notes = {};
                 this.equation = null;
                 
                 this.init();
@@ -366,12 +393,16 @@
                     if (!(molecule in this.coefficients)) {
                         this.coefficients[molecule] = 1;
                     }
+                    if (!(molecule in this.notes)) {
+                        this.notes[molecule] = '';
+                    }
                 });
 
-                // Remove coefficients for molecules no longer in equation
+                // Remove coefficients and notes for molecules no longer in equation
                 Object.keys(this.coefficients).forEach(molecule => {
                     if (!allMolecules.includes(molecule)) {
                         delete this.coefficients[molecule];
+                        delete this.notes[molecule];
                     }
                 });
             }
@@ -464,6 +495,10 @@
                 this.updateBalanceStatus();
             }
 
+            updateNote(molecule, value) {
+                this.notes[molecule] = value;
+            }
+
             increment(molecule) {
                 this.coefficients[molecule] = (this.coefficients[molecule] || 0) + 1;
                 this.updateAtomCounts();
@@ -505,6 +540,13 @@
                                 onchange="balancer.updateCoefficient('${molecule}', this.value)"
                             >
                             <button class="arrow-btn" onclick="balancer.increment('${molecule}')">+</button>
+                        </div>
+                        <div class="molecule-notes">
+                            <textarea 
+                                class="notes-textarea"
+                                placeholder="Add notes about ${molecule}..."
+                                oninput="balancer.updateNote('${molecule}', this.value)"
+                            >${this.notes[molecule] || ''}</textarea>
                         </div>
                     `;
                     
