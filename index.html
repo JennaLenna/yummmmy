@@ -244,6 +244,21 @@
             background: #ef4444;
         }
 
+        .atom-difference {
+            font-size: 12px;
+            color: #666;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .atom-difference.need-more {
+            color: #dc2626;
+        }
+
+        .atom-difference.need-less {
+            color: #ea580c;
+        }
+
         .arrow-divider {
             display: flex;
             align-items: center;
@@ -568,20 +583,49 @@
                     const leftCount = reactantAtoms[atom] || 0;
                     const rightCount = productAtoms[atom] || 0;
                     const balanced = leftCount === rightCount && leftCount > 0;
+                    const difference = rightCount - leftCount;
                     
+                    // Left side item
                     const leftItem = document.createElement('li');
                     leftItem.className = 'atom-item';
+                    let leftDiffHTML = '';
+                    if (!balanced && difference !== 0) {
+                        if (difference > 0) {
+                            // Need more on the left (reactants)
+                            leftDiffHTML = `<span class="atom-difference need-more">(need +${difference})</span>`;
+                        } else {
+                            // Have too many on the left (reactants)
+                            leftDiffHTML = `<span class="atom-difference need-less">(have ${Math.abs(difference)} extra)</span>`;
+                        }
+                    }
                     leftItem.innerHTML = `
                         <span class="atom-symbol">${atom}</span>
-                        <span class="atom-count ${balanced ? 'balanced' : 'unbalanced'}">${leftCount}</span>
+                        <div>
+                            <span class="atom-count ${balanced ? 'balanced' : 'unbalanced'}">${leftCount}</span>
+                            ${leftDiffHTML}
+                        </div>
                     `;
                     this.reactantsAtoms.appendChild(leftItem);
                     
+                    // Right side item
                     const rightItem = document.createElement('li');
                     rightItem.className = 'atom-item';
+                    let rightDiffHTML = '';
+                    if (!balanced && difference !== 0) {
+                        if (difference < 0) {
+                            // Need more on the right (products)
+                            rightDiffHTML = `<span class="atom-difference need-more">(need +${Math.abs(difference)})</span>`;
+                        } else {
+                            // Have too many on the right (products)
+                            rightDiffHTML = `<span class="atom-difference need-less">(have ${difference} extra)</span>`;
+                        }
+                    }
                     rightItem.innerHTML = `
                         <span class="atom-symbol">${atom}</span>
-                        <span class="atom-count ${balanced ? 'balanced' : 'unbalanced'}">${rightCount}</span>
+                        <div>
+                            <span class="atom-count ${balanced ? 'balanced' : 'unbalanced'}">${rightCount}</span>
+                            ${rightDiffHTML}
+                        </div>
                     `;
                     this.productsAtoms.appendChild(rightItem);
                 });
