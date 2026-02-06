@@ -90,13 +90,100 @@
             padding: 15px;
             border-radius: 10px;
             border: 2px solid #e9ecef;
+            position: relative;
+        }
+
+        .molecule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
         .molecule-label {
             font-weight: 600;
             color: #333;
-            margin-bottom: 10px;
             font-size: 14px;
+        }
+
+        .settings-menu-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            transition: opacity 0.3s;
+        }
+
+        .settings-menu-btn:hover {
+            opacity: 0.7;
+        }
+
+        .settings-menu-btn span {
+            width: 18px;
+            height: 2px;
+            background: #667eea;
+            border-radius: 2px;
+        }
+
+        .settings-dropdown {
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .settings-dropdown.hidden {
+            display: none;
+        }
+
+        .settings-dropdown label {
+            font-size: 12px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .settings-dropdown input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .settings-dropdown input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .reset-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin-left: 10px;
+        }
+
+        .reset-btn:hover {
+            background: #d97706;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.95);
         }
 
         .coefficient-control {
@@ -308,12 +395,16 @@
 
         <div class="equation-input-section">
             <label for="equation-input">Enter your chemical equation:</label>
-            <input 
-                type="text" 
-                id="equation-input" 
-                placeholder="e.g., H2 + O2 -> H2O"
-                value="H2 + O2 -> H2O"
-            >
+            <div style="display: flex; align-items: center;">
+                <input 
+                    type="text" 
+                    id="equation-input" 
+                    placeholder="e.g., H2 + O2 -> H2O"
+                    value="H2 + O2 -> H2O"
+                    style="flex: 1;"
+                >
+                <button class="reset-btn" onclick="balancer.resetAllMolecules()">Reset All</button>
+            </div>
             <p class="help-text">Use -> or = to separate reactants and products. Use + to separate molecules.</p>
         </div>
 
@@ -353,6 +444,7 @@
                 
                 this.coefficients = {};
                 this.notes = {};
+                this.moleculeSettings = {}; // { molecule: { startingValue: 1, multipleOf: 1 } }
                 this.equation = null;
                 
                 this.init();
@@ -411,13 +503,20 @@
                     if (!(molecule in this.notes)) {
                         this.notes[molecule] = '';
                     }
+                    if (!(molecule in this.moleculeSettings)) {
+                        this.moleculeSettings[molecule] = {
+                            startingValue: 1,
+                            multipleOf: 1
+                        };
+                    }
                 });
 
-                // Remove coefficients and notes for molecules no longer in equation
+                // Remove coefficients, notes, and settings for molecules no longer in equation
                 Object.keys(this.coefficients).forEach(molecule => {
                     if (!allMolecules.includes(molecule)) {
                         delete this.coefficients[molecule];
                         delete this.notes[molecule];
+                        delete this.moleculeSettings[molecule];
                     }
                 });
             }
@@ -504,8 +603,10 @@
             }
 
             updateCoefficient(molecule, value) {
-                value = Math.max(0, parseInt(value) || 0);
-                this.coefficients[molecule] = value;
+                const settings = this.moleculeSettings[molecule] || { startingValue: 1, multipleOf: 1 };
+                const numValue = parseInt(value) || settings.startingValue;
+                // Don't allow going below starting value
+                this.coefficients[molecule] = Math.max(settings.startingValue, numValue);
                 this.updateAtomCounts();
                 this.updateBalanceStatus();
             }
@@ -515,17 +616,56 @@
             }
 
             increment(molecule) {
-                this.coefficients[molecule] = (this.coefficients[molecule] || 0) + 1;
+                const settings = this.moleculeSettings[molecule] || { startingValue: 1, multipleOf: 1 };
+                this.coefficients[molecule] = (this.coefficients[molecule] || settings.startingValue) + settings.multipleOf;
                 this.updateAtomCounts();
                 this.updateBalanceStatus();
                 document.getElementById(`coeff-${this.sanitizeId(molecule)}`).value = this.coefficients[molecule];
             }
 
             decrement(molecule) {
-                this.coefficients[molecule] = Math.max(0, (this.coefficients[molecule] || 1) - 1);
+                const settings = this.moleculeSettings[molecule] || { startingValue: 1, multipleOf: 1 };
+                const newValue = (this.coefficients[molecule] || settings.startingValue) - settings.multipleOf;
+                // Don't allow going below starting value
+                this.coefficients[molecule] = Math.max(settings.startingValue, newValue);
                 this.updateAtomCounts();
                 this.updateBalanceStatus();
                 document.getElementById(`coeff-${this.sanitizeId(molecule)}`).value = this.coefficients[molecule];
+            }
+
+            toggleSettings(molecule) {
+                const dropdown = document.getElementById(`settings-${this.sanitizeId(molecule)}`);
+                if (dropdown) {
+                    dropdown.classList.toggle('hidden');
+                }
+            }
+
+            updateMoleculeSettings(molecule, field, value) {
+                const numValue = parseInt(value) || 1;
+                if (numValue < 1) return; // Don't allow values less than 1
+                
+                this.moleculeSettings[molecule][field] = numValue;
+                
+                // If starting value changed, update coefficient if it's below the new starting value
+                if (field === 'startingValue') {
+                    if (this.coefficients[molecule] < numValue) {
+                        this.coefficients[molecule] = numValue;
+                        document.getElementById(`coeff-${this.sanitizeId(molecule)}`).value = numValue;
+                        this.updateAtomCounts();
+                        this.updateBalanceStatus();
+                    }
+                }
+            }
+
+            resetAllMolecules() {
+                const allMolecules = [...this.equation.reactants, ...this.equation.products];
+                allMolecules.forEach(molecule => {
+                    const settings = this.moleculeSettings[molecule] || { startingValue: 1, multipleOf: 1 };
+                    this.coefficients[molecule] = settings.startingValue;
+                    document.getElementById(`coeff-${this.sanitizeId(molecule)}`).value = settings.startingValue;
+                });
+                this.updateAtomCounts();
+                this.updateBalanceStatus();
             }
 
             sanitizeId(str) {
@@ -540,18 +680,42 @@
                 allMolecules.forEach((molecule, index) => {
                     const isReactant = this.equation.reactants.includes(molecule);
                     const side = isReactant ? 'Reactant' : 'Product';
+                    const settings = this.moleculeSettings[molecule] || { startingValue: 1, multipleOf: 1 };
                     
                     const control = document.createElement('div');
                     control.className = 'molecule-control';
                     control.innerHTML = `
-                        <div class="molecule-label">${molecule} (${side})</div>
+                        <div class="molecule-header">
+                            <div class="molecule-label">${molecule} (${side})</div>
+                            <button class="settings-menu-btn" onclick="balancer.toggleSettings('${molecule}')">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </button>
+                        </div>
+                        <div id="settings-${this.sanitizeId(molecule)}" class="settings-dropdown hidden">
+                            <label>Starting Value:</label>
+                            <input 
+                                type="number" 
+                                value="${settings.startingValue}" 
+                                min="1"
+                                onchange="balancer.updateMoleculeSettings('${molecule}', 'startingValue', this.value)"
+                            >
+                            <label>Multiples Of:</label>
+                            <input 
+                                type="number" 
+                                value="${settings.multipleOf}" 
+                                min="1"
+                                onchange="balancer.updateMoleculeSettings('${molecule}', 'multipleOf', this.value)"
+                            >
+                        </div>
                         <div class="coefficient-control">
                             <button class="arrow-btn" onclick="balancer.decrement('${molecule}')">−</button>
                             <input 
                                 type="number" 
                                 id="coeff-${this.sanitizeId(molecule)}"
-                                value="${this.coefficients[molecule] || 1}" 
-                                min="0"
+                                value="${this.coefficients[molecule] || settings.startingValue}" 
+                                min="${settings.startingValue}"
                                 onchange="balancer.updateCoefficient('${molecule}', this.value)"
                             >
                             <button class="arrow-btn" onclick="balancer.increment('${molecule}')">+</button>
