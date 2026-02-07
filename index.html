@@ -5,6 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chemical Equation Balancer Practice</title>
     <style>
+        :root {
+            /* Teal-blue color palette */
+            --primary-color: #0891b2;
+            --primary-hover: #0e7490;
+            --primary-light: #06b6d4;
+            
+            /* Light mode colors */
+            --bg-gradient-start: #06b6d4;
+            --bg-gradient-end: #0891b2;
+            --container-bg: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+            --border-color: #dddddd;
+            --border-light: #e9ecef;
+            --input-bg: #ffffff;
+            --card-bg: #f8f9fa;
+            --atom-item-bg: #ffffff;
+        }
+
+        body.dark-mode {
+            /* Dark mode colors */
+            --bg-gradient-start: #0e7490;
+            --bg-gradient-end: #134e4a;
+            --container-bg: #1f2937;
+            --text-primary: #f3f4f6;
+            --text-secondary: #d1d5db;
+            --text-tertiary: #9ca3af;
+            --border-color: #4b5563;
+            --border-light: #374151;
+            --input-bg: #374151;
+            --card-bg: #374151;
+            --atom-item-bg: #4b5563;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,34 +48,66 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
             min-height: 100vh;
             padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: background 0.3s ease;
         }
 
         .container {
-            background: white;
+            background: var(--container-bg);
             border-radius: 20px;
             padding: 40px;
             max-width: 900px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+        .dark-mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dark-mode-toggle:hover {
+            background: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        .dark-mode-toggle:active {
+            transform: scale(0.95);
         }
 
         h1 {
-            color: #333;
+            color: var(--text-primary);
             margin-bottom: 10px;
             text-align: center;
+            transition: color 0.3s ease;
         }
 
         .subtitle {
             text-align: center;
-            color: #666;
+            color: var(--text-secondary);
             margin-bottom: 30px;
             font-size: 14px;
+            transition: color 0.3s ease;
         }
 
         .equation-input-section {
@@ -50,28 +117,32 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #555;
+            color: var(--text-secondary);
             font-weight: 600;
+            transition: color 0.3s ease;
         }
 
         input[type="text"] {
             width: 100%;
             padding: 12px;
-            border: 2px solid #ddd;
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
+            background: var(--input-bg);
+            color: var(--text-primary);
         }
 
         input[type="text"]:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary-color);
         }
 
         .help-text {
             font-size: 12px;
-            color: #999;
+            color: var(--text-tertiary);
             margin-top: 5px;
+            transition: color 0.3s ease;
         }
 
         .molecules-section {
@@ -86,11 +157,12 @@
         }
 
         .molecule-control {
-            background: #f8f9fa;
+            background: var(--card-bg);
             padding: 15px;
             border-radius: 10px;
-            border: 2px solid #e9ecef;
+            border: 2px solid var(--border-light);
             position: relative;
+            transition: all 0.3s ease;
         }
 
         .molecule-header {
@@ -102,8 +174,9 @@
 
         .molecule-label {
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
             font-size: 14px;
+            transition: color 0.3s ease;
         }
 
         .settings-menu-btn {
@@ -124,21 +197,23 @@
         .settings-menu-btn span {
             width: 18px;
             height: 2px;
-            background: #667eea;
+            background: var(--primary-color);
             border-radius: 2px;
+            transition: background 0.3s ease;
         }
 
         .settings-dropdown {
             position: absolute;
             top: 40px;
             right: 10px;
-            background: white;
-            border: 2px solid #667eea;
+            background: var(--container-bg);
+            border: 2px solid var(--primary-color);
             border-radius: 8px;
             padding: 15px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1000;
             min-width: 200px;
+            transition: all 0.3s ease;
         }
 
         .settings-dropdown.hidden {
@@ -154,15 +229,18 @@
         .settings-dropdown input {
             width: 100%;
             padding: 6px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             margin-bottom: 10px;
             font-size: 13px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
         }
 
         .settings-dropdown input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary-color);
         }
 
         .reset-btn {
@@ -193,7 +271,7 @@
         }
 
         .arrow-btn {
-            background: #667eea;
+            background: var(--primary-color);
             color: white;
             border: none;
             width: 36px;
@@ -204,11 +282,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
 
         .arrow-btn:hover {
-            background: #5568d3;
+            background: var(--primary-hover);
         }
 
         .arrow-btn:active {
@@ -218,16 +296,19 @@
         input[type="number"] {
             width: 60px;
             padding: 8px;
-            border: 2px solid #ddd;
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             text-align: center;
             font-size: 16px;
             font-weight: 600;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
         }
 
         input[type="number"]:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary-color);
         }
 
         /* Hide number input spinners */
@@ -248,37 +329,41 @@
         .notes-textarea {
             width: 100%;
             padding: 8px;
-            border: 2px solid #ddd;
+            border: 2px solid var(--border-color);
             border-radius: 6px;
             font-size: 13px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             resize: vertical;
             min-height: 50px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
+            background: var(--input-bg);
+            color: var(--text-primary);
         }
 
         .notes-textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary-color);
         }
 
         .notes-textarea::placeholder {
-            color: #999;
+            color: var(--text-tertiary);
             font-style: italic;
         }
 
         .atom-counts-section {
-            background: #f8f9fa;
+            background: var(--card-bg);
             border-radius: 10px;
             padding: 20px;
-            border: 2px solid #e9ecef;
+            border: 2px solid var(--border-light);
+            transition: all 0.3s ease;
         }
 
         .atom-counts-title {
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
             margin-bottom: 15px;
             font-size: 18px;
+            transition: color 0.3s ease;
         }
 
         .atom-counts-grid {
@@ -291,8 +376,9 @@
         .side-label {
             text-align: center;
             font-weight: 600;
-            color: #667eea;
+            color: var(--primary-color);
             margin-bottom: 10px;
+            transition: color 0.3s ease;
         }
 
         .atom-list {
@@ -302,20 +388,22 @@
         .atom-item {
             padding: 8px;
             margin-bottom: 5px;
-            background: white;
+            background: var(--atom-item-bg);
             border-radius: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background 0.3s ease;
         }
 
         .atom-symbol {
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
         }
 
         .atom-count {
-            background: #667eea;
+            background: var(--primary-color);
             color: white;
             padding: 4px 10px;
             border-radius: 12px;
@@ -333,9 +421,10 @@
 
         .atom-difference {
             font-size: 12px;
-            color: #666;
+            color: var(--text-secondary);
             margin-left: 8px;
             font-weight: 500;
+            transition: color 0.3s ease;
         }
 
         .atom-difference.need-more {
@@ -351,8 +440,9 @@
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            color: #667eea;
+            color: var(--primary-color);
             font-weight: bold;
+            transition: color 0.3s ease;
         }
 
         .error-message {
@@ -390,6 +480,10 @@
 </head>
 <body>
     <div class="container">
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()" id="dark-mode-toggle">
+            <span id="theme-icon">🌙</span>
+            <span id="theme-text">Dark Mode</span>
+        </button>
         <h1>⚗️ Chemical Equation Balancer Practice</h1>
         <p class="subtitle">Balance equations by adjusting coefficients - the tool won't solve it for you!</p>
 
@@ -433,6 +527,40 @@
     </div>
 
     <script>
+        // Dark mode toggle functionality
+        function toggleDarkMode() {
+            const body = document.body;
+            const isDarkMode = body.classList.toggle('dark-mode');
+            
+            // Update button text and icon
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (isDarkMode) {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light Mode';
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark Mode';
+            }
+            
+            // Save preference to localStorage
+            localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+        }
+
+        // Check for saved dark mode preference on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkMode = localStorage.getItem('darkMode');
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (darkMode === 'enabled') {
+                document.body.classList.add('dark-mode');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light Mode';
+            }
+        });
+
         class ChemicalEquationBalancer {
             constructor() {
                 this.equationInput = document.getElementById('equation-input');
