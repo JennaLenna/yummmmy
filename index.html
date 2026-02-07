@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemical Equation Balancer Practice</title>
+    <style>
+        :root {
+            /* Teal-blue color palette */
+            --primary-color: #0891b2;
+            --primary-hover: #0e7490;
+            --primary-light: #06b6d4;
+            
+            /* Light mode colors */
+            --bg-gradient-start: #06b6d4;
+            --bg-gradient-end: #0891b2;
+            --container-bg: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+            --border-color: #dddddd;
+            --border-light: #e9ecef;
+            --input-bg: #ffffff;
+            --card-bg: #f8f9fa;
+            --atom-item-bg: #ffffff;
+        }
+
+        body.dark-mode {
+            /* Dark mode colors */
+            --bg-gradient-start: #0e7490;
+            --bg-gradient-end: #134e4a;
+            --container-bg: #1f2937;
+            --text-primary: #f3f4f6;
+            --text-secondary: #d1d5db;
+            --text-tertiary: #9ca3af;
+            --border-color: #4b5563;
+            --border-light: #374151;
+            --input-bg: #374151;
+            --card-bg: #374151;
+            --atom-item-bg: #4b5563;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .container {
+            background: var(--container-bg);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+        .dark-mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dark-mode-toggle:hover {
+            background: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        .dark-mode-toggle:active {
+            transform: scale(0.95);
+        }
+
+        h1 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .equation-input-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .molecules-section {
+            margin-bottom: 30px;
+        }
+
+        .molecules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .molecule-control {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--border-light);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .molecule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .molecule-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .settings-menu-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            transition: opacity 0.3s;
+        }
+
+        .settings-menu-btn:hover {
+            opacity: 0.7;
+        }
+
+        .settings-menu-btn span {
+            width: 18px;
+            height: 2px;
+            background: var(--primary-color);
+            border-radius: 2px;
+            transition: background 0.3s ease;
+        }
+
+        .settings-dropdown {
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            background: var(--container-bg);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        .settings-dropdown.hidden {
+            display: none;
+        }
+
+        .settings-dropdown label {
+            font-size: 12px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .settings-dropdown input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .settings-dropdown input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .reset-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin-left: 10px;
+        }
+
+        .reset-btn:hover {
+            background: #d97706;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.95);
+        }
+
+        .coefficient-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .arrow-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .arrow-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .arrow-btn:active {
+            transform: scale(0.95);
+        }
+
+        input[type="number"] {
+            width: 60px;
+            padding: 8px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Hide number input spinners */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .molecule-notes {
+            margin-top: 10px;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            resize: vertical;
+            min-height: 50px;
+            transition: all 0.3s;
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        .notes-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .notes-textarea::placeholder {
+            color: var(--text-tertiary);
+            font-style: italic;
+        }
+
+        .atom-counts-section {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+
+        .atom-counts-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+
+        .atom-counts-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .side-label {
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .atom-list {
+            list-style: none;
+        }
+
+        .atom-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: var(--atom-item-bg);
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .atom-symbol {
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+
+        .atom-count {
+            background: var(--primary-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .balanced {
+            background: #10b981;
+        }
+
+        .unbalanced {
+            background: #ef4444;
+        }
+
+        .atom-difference {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-left: 8px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .atom-difference.need-more {
+            color: #dc2626;
+        }
+
+        .atom-difference.need-less {
+            color: #ea580c;
+        }
+
+        .arrow-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary-color);
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fcc;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .balance-status {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .balance-status.balanced {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .balance-status.unbalanced {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()" id="dark-mode-toggle">
+            <span id="theme-icon">🌙</span>
+            <span id="theme-text">Dark Mode</span>
+        </button>
+        <h1>⚗️ Chemical Equation Balancer Practice</h1>
+        <p class="subtitle">Balance equations by adjusting coefficients - the tool won't solve it for you!</p>
+
+        <div class="equation-input-section">
+            <label for="equation-input">Enter your chemical equation:</label>
+            <div style="display: flex; align-items: center;">
+                <input 
+                    type="text" 
+                    id="equation-input" 
+                    placeholder="e.g., H2 + O2 -> H2O"
+                    value="H2 + O2 -> H2O"
+                    style="flex: 1;"
+                >
+                <button class="reset-btn" onclick="balancer.resetAllMolecules()">Reset All</button>
+            </div>
+            <p class="help-text">Use -> or = to separate reactants and products. Use + to separate molecules.</p>
+        </div>
+
+        <div id="error-container" class="error-message hidden"></div>
+
+        <div class="molecules-section">
+            <label>Adjust coefficients:</label>
+            <div id="molecules-container" class="molecules-grid"></div>
+        </div>
+
+        <div class="atom-counts-section">
+            <h3 class="atom-counts-title">Atom Counts</h3>
+            <div class="atom-counts-grid">
+                <div>
+                    <div class="side-label">Reactants (Left)</div>
+                    <ul id="reactants-atoms" class="atom-list"></ul>
+                </div>
+                <div class="arrow-divider">→</div>
+                <div>
+                    <div class="side-label">Products (Right)</div>
+                    <ul id="products-atoms" class="atom-list"></ul>
+                </div>
+            </div>
+            <div id="balance-status" class="balance-status hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode toggle functionality
+        function toggleDarkMode() {
+            const body = document.body;
+            const isDarkMode = body.classList.toggle('dark-mode');
+            
+            // Update button text and icon
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (isDarkMode) {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light Mode';
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark Mode';
+            }
+            
+            // Save preference to localStorage
+            localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+        }
+
+        // Check for saved dark mode preference on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkMode = localStorage.getItem('darkMode');
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (darkMode === 'enabled') {
+                document.body.classList.add('dark-mode');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light Mode';
+            }
+        });
+
+        class ChemicalEquationBalancer {
+            constructor() {
+                this.equationInput = document.getElementById('equation-input');
+                this.moleculesContainer = document.getElementById('molecules-container');
+                this.reactantsAtoms = document.getElementById('reactants-atoms');
+                this.productsAtoms = document.getElementById('products-atoms');
+                this.errorContainer = document.getElementById('error-container');
+                this.balanceStatus = document.getElementById('balance-status');
+                
+                this.coefficients = {};
+                this.notes = {};
+                this.moleculeSettings = {}; // { molecule: { startingValue: 1, multipleOf: 1 } }
+                this.equation = null;
+                
+                this.init();
+            }
+
+            init() {
+                this.equationInput.addEventListener('input', () => this.parseEquation());
+                this.parseEquation();
+            }
+
+            parseEquation() {
+                try {
+                    const input = this.equationInput.value.trim();
+                    if (!input) {
+                        this.showError('Please enter a chemical equation');
+                        return;
+                    }
+
+                    // Split by arrow (-> or =)
+                    const parts = input.split(/->|=/).map(s => s.trim());
+                    if (parts.length !== 2) {
+                        this.showError('Equation must have reactants and products separated by -> or =');
+                        return;
+                    }
+
+                    const [reactantsStr, productsStr] = parts;
+                    
+                    // Parse reactants and products
+                    const reactants = this.parseMolecules(reactantsStr);
+                    const products = this.parseMolecules(productsStr);
+
+                    if (reactants.length === 0 || products.length === 0) {
+                        this.showError('Both sides must have at least one molecule');
+                        return;
+                    }
+
+                    this.equation = { reactants, products };
+                    this.hideError();
+                    this.initializeCoefficients();
+                    this.render();
+                } catch (error) {
+                    this.showError(error.message);
+                }
+            }
+
+            parseMolecules(str) {
+                return str.split('+').map(s => s.trim()).filter(s => s.length > 0);
+            }
+
+            initializeCoefficients() {
+                const allMolecules = [...this.equation.reactants, ...this.equation.products];
+                allMolecules.forEach(molecule => {
+                    if (!(molecule in this.coefficients)) {
+                        this.coefficients[molecule] = 1;
+                    }
+                    if (!(molecule in this.notes)) {
+                        this.notes[molecule] = '';
+                    }
+                    if (!(molecule in this.moleculeSettings)) {
+                        this.moleculeSettings[molecule] = {
+                            startingValue: 1,
+                            multipleOf: 1
+                        };
+                    }
+                });
+
+                // Remove coefficients, notes, and settings for molecules no longer in equation
+                Object.keys(this.coefficients).forEach(molecule => {
+                    if (!allMolecules.includes(molecule)) {
+                        delete this.coefficients[molecule];
+                        delete this.notes[molecule];
+                        delete this.moleculeSettings[molecule];
+                    }
+                });
+            }
+
+            parseMolecule(formula) {
+                // Parse a chemical formula like H2O, Ca(OH)2, etc.
+                const atoms = {};
+                let i = 0;
+                
+                while (i < formula.length) {
+                    // Skip coefficient at the beginning (we handle it separately)
+                    if (i === 0 && /\d/.test(formula[i])) {
+                        while (i < formula.length && /\d/.test(formula[i])) {
+                            i++;
+                        }
+                        continue;
+                    }
+
+                    // Handle parentheses
+                    if (formula[i] === '(') {
+                        const closeIdx = formula.indexOf(')', i);
+                        if (closeIdx === -1) throw new Error('Unmatched parentheses in ' + formula);
+                        
+                        const insideParens = formula.substring(i + 1, closeIdx);
+                        let multiplier = '';
+                        let j = closeIdx + 1;
+                        while (j < formula.length && /\d/.test(formula[j])) {
+                            multiplier += formula[j];
+                            j++;
+                        }
+                        multiplier = multiplier ? parseInt(multiplier) : 1;
+                        
+                        const subAtoms = this.parseMolecule(insideParens);
+                        for (const [atom, count] of Object.entries(subAtoms)) {
+                            atoms[atom] = (atoms[atom] || 0) + count * multiplier;
+                        }
+                        
+                        i = j;
+                        continue;
+                    }
+
+                    // Handle regular elements
+                    if (/[A-Z]/.test(formula[i])) {
+                        let element = formula[i];
+                        i++;
+                        
+                        // Add lowercase letters
+                        while (i < formula.length && /[a-z]/.test(formula[i])) {
+                            element += formula[i];
+                            i++;
+                        }
+                        
+                        // Get count
+                        let count = '';
+                        while (i < formula.length && /\d/.test(formula[i])) {
+                            count += formula[i];
+                            i++;
+                        }
+                        count = count ? parseInt(count) : 1;
+                        
+                        atoms[element] = (atoms[element] || 0) + count;
+                        continue;
+                    }
+
+                    i++;
+                }
+                
+                return atoms;
+            }
+
+            countAtoms(molecules, coefficients) {
+                const atomCounts = {};
+                
+                molecules.forEach(molecule => {
+                    const coefficient = coefficients[molecule] || 1;
+                    const atoms = this.parseMolecule(molecule);
+                    
+                    for (const [atom, count] of Object.entries(atoms)) {
+                        atomCounts[atom] = (atomCounts[atom] || 0) + count * coefficient;
+                    }
+                });
+                
+                return atomCounts;
+            }
+
+            updateCoefficient(molecule, value) {
+                const settings = this.moleculeSettings[molecule] || { startingValue: 1, multipleOf: 1 };
+                const numValue = parseInt(value) || settings.startingValue;
+                // Don't allow going below starting value
+                this.coefficients[molecule] = Math.max(settings.startingValue, numValue);
+                this.updateAtomCounts();
+                this.updateBalanceStatus();
+            }
+
+            updateNote(molecule, value) {
+                this.notes[molecule] = value;
+            }
+
+            increment(molecule) {
+                const settings = this.moleculeSettings[molecule] || { startingValue: 1, multipleOf: 1 };
+                this.coefficients[molecule] = (this.coefficients[molecule] || settings.startingValue) + settings.multipleOf;
+                this.updateAtomCounts();
+                this.updateBalanceStatus();
+                document.getElementById(`coeff-${this.sanitizeId(molecule)}`).value = this.coefficients[molecule];
+            }
+
+            decrement(molecule) {
+                const settings = this.moleculeSettings[molecule] || { startingValue: 1, multipleOf: 1 };
+                const newValue = (this.coefficients[molecule] || settings.startingValue) - settings.multipleOf;
+                // Don't allow going below starting value
+                this.coefficients[molecule] = Math.max(settings.startingValue, newValue);
+                this.updateAtomCounts();
+                this.updateBalanceStatus();
+                document.getElementById(`coeff-${this.sanitizeId(molecule)}`).value = this.coefficients[molecule];
+            }
+
+            toggleSettings(molecule) {
+                const dropdown = document.getElementById(`settings-${this.sanitizeId(molecule)}`);
+                if (dropdown) {
+                    dropdown.classList.toggle('hidden');
+                }
+            }
+
+            updateMoleculeSettings(molecule, field, value) {
+                const numValue = parseInt(value) || 1;
+                if (numValue < 1) return; // Don't allow values less than 1
+                
+                this.moleculeSettings[molecule][field] = numValue;
+                
+                // If starting value changed, update coefficient if it's below the new starting value
+                if (field === 'startingValue') {
+                    if (this.coefficients[molecule] < numValue) {
+                        this.coefficients[molecule] = numValue;
+                        document.getElementById(`coeff-${this.sanitizeId(molecule)}`).value = numValue;
+                        this.updateAtomCounts();
+                        this.updateBalanceStatus();
+                    }
+                }
+            }
+
+            resetAllMolecules() {
+                const allMolecules = [...this.equation.reactants, ...this.equation.products];
+                allMolecules.forEach(molecule => {
+                    const settings = this.moleculeSettings[molecule] || { startingValue: 1, multipleOf: 1 };
+                    this.coefficients[molecule] = settings.startingValue;
+                    document.getElementById(`coeff-${this.sanitizeId(molecule)}`).value = settings.startingValue;
+                });
+                this.updateAtomCounts();
+                this.updateBalanceStatus();
+            }
+
+            sanitizeId(str) {
+                return str.replace(/[^a-zA-Z0-9]/g, '_');
+            }
+
+            renderMoleculeControls() {
+                this.moleculesContainer.innerHTML = '';
+                
+                const allMolecules = [...this.equation.reactants, ...this.equation.products];
+                
+                allMolecules.forEach((molecule, index) => {
+                    const isReactant = this.equation.reactants.includes(molecule);
+                    const side = isReactant ? 'Reactant' : 'Product';
+                    const settings = this.moleculeSettings[molecule] || { startingValue: 1, multipleOf: 1 };
+                    
+                    const control = document.createElement('div');
+                    control.className = 'molecule-control';
+                    control.innerHTML = `
+                        <div class="molecule-header">
+                            <div class="molecule-label">${molecule} (${side})</div>
+                            <button class="settings-menu-btn" onclick="balancer.toggleSettings('${molecule}')">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </button>
+                        </div>
+                        <div id="settings-${this.sanitizeId(molecule)}" class="settings-dropdown hidden">
+                            <label>Starting Value:</label>
+                            <input 
+                                type="number" 
+                                value="${settings.startingValue}" 
+                                min="1"
+                                onchange="balancer.updateMoleculeSettings('${molecule}', 'startingValue', this.value)"
+                            >
+                            <label>Multiples Of:</label>
+                            <input 
+                                type="number" 
+                                value="${settings.multipleOf}" 
+                                min="1"
+                                onchange="balancer.updateMoleculeSettings('${molecule}', 'multipleOf', this.value)"
+                            >
+                        </div>
+                        <div class="coefficient-control">
+                            <button class="arrow-btn" onclick="balancer.decrement('${molecule}')">−</button>
+                            <input 
+                                type="number" 
+                                id="coeff-${this.sanitizeId(molecule)}"
+                                value="${this.coefficients[molecule] || settings.startingValue}" 
+                                min="${settings.startingValue}"
+                                onchange="balancer.updateCoefficient('${molecule}', this.value)"
+                            >
+                            <button class="arrow-btn" onclick="balancer.increment('${molecule}')">+</button>
+                        </div>
+                        <div class="molecule-notes">
+                            <textarea 
+                                class="notes-textarea"
+                                placeholder="Add notes about ${molecule}..."
+                                oninput="balancer.updateNote('${molecule}', this.value)"
+                            >${this.notes[molecule] || ''}</textarea>
+                        </div>
+                    `;
+                    
+                    this.moleculesContainer.appendChild(control);
+                });
+            }
+
+            updateAtomCounts() {
+                const reactantAtoms = this.countAtoms(this.equation.reactants, this.coefficients);
+                const productAtoms = this.countAtoms(this.equation.products, this.coefficients);
+                
+                // Get all unique atoms
+                const allAtoms = new Set([...Object.keys(reactantAtoms), ...Object.keys(productAtoms)]);
+                
+                this.reactantsAtoms.innerHTML = '';
+                this.productsAtoms.innerHTML = '';
+                
+                allAtoms.forEach(atom => {
+                    const leftCount = reactantAtoms[atom] || 0;
+                    const rightCount = productAtoms[atom] || 0;
+                    const balanced = leftCount === rightCount && leftCount > 0;
+                    const difference = rightCount - leftCount;
+                    
+                    // Left side item
+                    const leftItem = document.createElement('li');
+                    leftItem.className = 'atom-item';
+                    let leftDiffHTML = '';
+                    if (!balanced && difference !== 0) {
+                        if (difference > 0) {
+                            // Need more on the left (reactants)
+                            leftDiffHTML = `<span class="atom-difference need-more">(need +${difference})</span>`;
+                        } else {
+                            // Have too many on the left (reactants)
+                            leftDiffHTML = `<span class="atom-difference need-less">(have ${Math.abs(difference)} extra)</span>`;
+                        }
+                    }
+                    leftItem.innerHTML = `
+                        <span class="atom-symbol">${atom}</span>
+                        <div>
+                            <span class="atom-count ${balanced ? 'balanced' : 'unbalanced'}">${leftCount}</span>
+                            ${leftDiffHTML}
+                        </div>
+                    `;
+                    this.reactantsAtoms.appendChild(leftItem);
+                    
+                    // Right side item
+                    const rightItem = document.createElement('li');
+                    rightItem.className = 'atom-item';
+                    let rightDiffHTML = '';
+                    if (!balanced && difference !== 0) {
+                        if (difference < 0) {
+                            // Need more on the right (products)
+                            rightDiffHTML = `<span class="atom-difference need-more">(need +${Math.abs(difference)})</span>`;
+                        } else {
+                            // Have too many on the right (products)
+                            rightDiffHTML = `<span class="atom-difference need-less">(have ${difference} extra)</span>`;
+                        }
+                    }
+                    rightItem.innerHTML = `
+                        <span class="atom-symbol">${atom}</span>
+                        <div>
+                            <span class="atom-count ${balanced ? 'balanced' : 'unbalanced'}">${rightCount}</span>
+                            ${rightDiffHTML}
+                        </div>
+                    `;
+                    this.productsAtoms.appendChild(rightItem);
+                });
+            }
+
+            updateBalanceStatus() {
+                const reactantAtoms = this.countAtoms(this.equation.reactants, this.coefficients);
+                const productAtoms = this.countAtoms(this.equation.products, this.coefficients);
+                
+                const allAtoms = new Set([...Object.keys(reactantAtoms), ...Object.keys(productAtoms)]);
+                
+                let isBalanced = true;
+                for (const atom of allAtoms) {
+                    if ((reactantAtoms[atom] || 0) !== (productAtoms[atom] || 0)) {
+                        isBalanced = false;
+                        break;
+                    }
+                }
+                
+                // Check if all coefficients are non-zero
+                const hasZeroCoefficient = Object.values(this.coefficients).some(c => c === 0);
+                if (hasZeroCoefficient) {
+                    isBalanced = false;
+                }
+                
+                this.balanceStatus.classList.remove('hidden');
+                if (isBalanced) {
+                    this.balanceStatus.textContent = '✓ Equation is balanced!';
+                    this.balanceStatus.className = 'balance-status balanced';
+                } else {
+                    this.balanceStatus.textContent = '✗ Equation is not balanced yet';
+                    this.balanceStatus.className = 'balance-status unbalanced';
+                }
+            }
+
+            render() {
+                this.renderMoleculeControls();
+                this.updateAtomCounts();
+                this.updateBalanceStatus();
+            }
+
+            showError(message) {
+                this.errorContainer.textContent = message;
+                this.errorContainer.classList.remove('hidden');
+                this.moleculesContainer.innerHTML = '';
+                this.reactantsAtoms.innerHTML = '';
+                this.productsAtoms.innerHTML = '';
+                this.balanceStatus.classList.add('hidden');
+            }
+
+            hideError() {
+                this.errorContainer.classList.add('hidden');
+            }
+        }
+
+        // Initialize the app
+        const balancer = new ChemicalEquationBalancer();
+    </script>
+</body>
+</html>
